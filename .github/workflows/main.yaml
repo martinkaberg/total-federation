@@ -19,6 +19,8 @@ jobs:
           workload_identity_provider: 'projects/150418185326/locations/global/workloadIdentityPools/github/providers/totel-federation'
           service_account: 'github@germany-velen.iam.gserviceaccount.com'
       - name: 'Set up Cloud SDK'
+        with:
+          install_components: gke-gcloud-auth-plugin
         uses: 'google-github-actions/setup-gcloud@v0'
       - name: set crdential_file
         run: gcloud auth login --cred-file=${{steps.auth.outputs.credentials_file_path}}
