@@ -24,9 +24,9 @@ jobs:
         run: gcloud auth login --cred-file=${{steps.auth.outputs.credentials_file_path}}
       - name: '3. Setup kube context'
         run: gcloud container clusters get-credentials gcp-frankfurt --zone europe-west3-c --project germany-velen
-      - name: "6. List GCP VM's"
+      - name: "3-6. List GCP VM's"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/root/google-cloud-sdk/bin/gcloud compute instances list --project germany-velen | head"
-      - name: "6. List AWS VM's"
+      - name: "3-6. List AWS VM's"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/aws ec2 describe-instances | head"
       - name: "3-6. List Azure Resource Groups"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/az group list | head"
