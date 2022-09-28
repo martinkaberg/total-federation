@@ -1,19 +1,17 @@
 name: Total Federation
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} runs it
 on: [push]
 jobs:
   deploy:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
       - uses: azure/setup-kubectl@v3
       - id: 'auth'
-        name: 'Authenticate to Google Cloud'
+        name: '1. Federate github workload identity'
         uses: 'google-github-actions/auth@v0'
         with:
           workload_identity_provider: 'projects/150418185326/locations/global/workloadIdentityPools/github/providers/totel-federation'
@@ -22,14 +20,14 @@ jobs:
         with:
           install_components: gke-gcloud-auth-plugin
         uses: 'google-github-actions/setup-gcloud@v0'
-      - name: set crdential_file
+      - name: '2. Get Access Token'
         run: gcloud auth login --cred-file=${{steps.auth.outputs.credentials_file_path}}
-      - name: Kube Auth
+      - name: '3. Setup kube context'
         run: gcloud container clusters get-credentials gcp-frankfurt --zone europe-west3-c --project germany-velen
-      - name: List GCP VM's
+      - name: "6. List GCP VM's"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/root/google-cloud-sdk/bin/gcloud compute instances list --project germany-velen | head"
-      - name: List AWS VM's
+      - name: "6. List AWS VM's"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/aws ec2 describe-instances | head"
-      - name: List Azure Resource Groups
+      - name: "3-6. List Azure Resource Groups"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/az group list | head"
 
