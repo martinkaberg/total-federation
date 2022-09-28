@@ -27,9 +27,9 @@ jobs:
       - name: Kube Auth
         run: gcloud container clusters get-credentials gcp-frankfurt --zone europe-west3-c --project germany-velen
       - name: List GCP VM's
-        run: kubectl exec -it deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/root/google-cloud-sdk/bin/gcloud compute instances list --project germany-velen"
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/root/google-cloud-sdk/bin/gcloud compute instances list --project germany-velen | head"
       - name: List AWS VM's
-        run: kubectl exec -it deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/aws ec2 describe-instances"
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/aws ec2 describe-instances | head"
       - name: List Azure Resource Groups
-        run: kubectl exec -it deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/az group list"
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/az group list | head"
 
