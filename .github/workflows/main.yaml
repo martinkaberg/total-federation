@@ -27,11 +27,11 @@ jobs:
       - name: '4. Test kube auth'
         run: kubectl get ns
       - name: '5. Federate login for az CLI'
-        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c 'az login --service-principal -u $AZURE_CLIENT_ID -t $AZURE_TENANT_ID --federated-token $(cat $AZURE_FEDERATED_TOKEN_FILE)'
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c '/usr/local/bin/az login --service-principal -u $AZURE_CLIENT_ID -t $AZURE_TENANT_ID --federated-token $(cat $AZURE_FEDERATED_TOKEN_FILE)'
       - name: '5. Federate login for gcloud CLI'
-        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c 'yes | gcloud auth login --cred-file $GOOGLE_APPLICATION_CREDENTIALS'
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c 'yes | /root/google-cloud-sdk/bin/gcloud auth login --cred-file $GOOGLE_APPLICATION_CREDENTIALS'
       - name: '5. Test federation for aws CLI'
-        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c 'aws sts get-caller-identity'
+        run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c '/usr/local/bin/aws  sts get-caller-identity'
       - name: "6. List GCP VM's"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/root/google-cloud-sdk/bin/gcloud compute instances list --project germany-velen | head"
       - name: "6. List AWS VM's"
