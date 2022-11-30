@@ -38,5 +38,3 @@ jobs:
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c "/usr/local/bin/aws ec2 describe-instances | head"
       - name: "6. List Azure Resource Groups"
         run: kubectl exec deploy/ubuntu  -c tools -n tools -- /bin/bash -c ' /usr/local/bin/az group list | head'
-
-
