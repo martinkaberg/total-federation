@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tools
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cloudsdk-config
+data:
+  config: |
+    {
+      "type": "external_account",
+      "audience": "//iam.googleapis.com/projects/150418185326/locations/global/workloadIdentityPools/velen/providers/gke-frankfurt-nhepvgto",
+      "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+      "token_url": "https://sts.googleapis.com/v1/token",
+      "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/velen-admin@germany-velen.iam.gserviceaccount.com:generateAccessToken",
+      "credential_source": {
+        "file": "/var/run/secrets/tokens/gcp-ksa/token",
+        "format": {
+          "type": "text"
+        }
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ubuntu
+    spec:
+      serviceAccountName: tools
+      containers:
+      - image: gcr.io/velen-images/tools:bc05d94
+        name: tools
+        env:
+          - name: AWS_STS_REGIONAL_ENDPOINTS
+            value: regional
+          - name: AWS_DEFAULT_REGION
+            value: eu-central-1
+          - name: AWS_REGION
+            value: eu-central-1
+          - name: AWS_ROLE_ARN
+            value: arn:aws:iam::357465590623:role/velen-admin
+          - name: AWS_WEB_IDENTITY_TOKEN_FILE
+            value: /var/run/secrets/tokens/aws-ksa/token
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/run/secrets/tokens/gcp-ksa/google-application-credentials.json
+          - name: AZURE_CLIENT_ID
+            value: "25fe9271-9ce7-4a54-b772-f48cdc101276"
+          - name: AZURE_TENANT_ID
+            value: "df8f2c27-a3b0-4fa2-8eef-47784622cfd7"
+          - name: AZURE_AUTHORITY_HOST
+            value: "https://login.microsoftonline.com/"
+          - name: AZURE_FEDERATED_TOKEN_FILE
+            value: "/var/run/secrets/tokens/aks-ksa/token"
+        volumeMounts:
+          - name: aks-ksa
+            mountPath: /var/run/secrets/tokens/aks-ksa
+            readOnly: true
+          - name: aws-ksa
+            mountPath: /var/run/secrets/tokens/aws-ksa
+            readOnly: true
+          - name: gcp-ksa
+            mountPath: /var/run/secrets/tokens/gcp-ksa
+            readOnly: true
+      volumes:
+        - name: aws-ksa
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  audience: project-velen
+                  expirationSeconds: 3600
+        - name: gcp-ksa
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  audience: project-velen
+                  expirationSeconds: 3600
+              - configMap:
+                  name: cloudsdk-config
+                  optional: false
+                  items:
+                    - key: "config"
+                      path: "google-application-credentials.json"
+        - name: aks-ksa
+          projected:
+            sources:
+            - serviceAccountToken:
+                path: token
+                expirationSeconds: 3600
+                audience: project-velen
